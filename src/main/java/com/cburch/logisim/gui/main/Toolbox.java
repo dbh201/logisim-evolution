@@ -41,6 +41,9 @@ class Toolbox extends JPanel {
     toolbox.setHaloedTool(value);
   }
   public void setSearchTerm(String t) {
+    if(t.equals("")) {
+      return;
+    }
     ((ProjectExplorerLibraryNode)toolbox.getModel().getRoot()).testSearchTerm(t);
     repaint();
   }
