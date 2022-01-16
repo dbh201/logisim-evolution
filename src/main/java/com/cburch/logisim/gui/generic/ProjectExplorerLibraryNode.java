@@ -24,6 +24,7 @@ import javax.swing.JTree;
 /**
  * Code taken from Cornell's version of Logisim: http://www.cs.cornell.edu/courses/cs3410/2015sp/
  */
+
 public class ProjectExplorerLibraryNode extends ProjectExplorerModel.Node<Library>
     implements LibraryListener {
 
@@ -31,6 +32,9 @@ public class ProjectExplorerLibraryNode extends ProjectExplorerModel.Node<Librar
   private LogisimFile file;
   private JTree guiElement = null;
   private final boolean showMouseTools;
+  private boolean matches_search = false;
+  private boolean child_matches_search = false;
+  private String last_search_term = "";
 
   ProjectExplorerLibraryNode(ProjectExplorerModel model, Library lib, JTree gui, boolean showMouseTools) {
     super(model, lib);
@@ -56,7 +60,30 @@ public class ProjectExplorerLibraryNode extends ProjectExplorerModel.Node<Librar
       }
     }
   }
-
+  public boolean matchesSearchTerm() {
+    return matches_search;
+  }
+  public boolean childMatchesSearchTerm() {
+    return child_matches_search;
+  }
+  public boolean testSearchTerm(String t) {
+    matches_search = getValue().getDisplayName().toLowerCase().contains(t.toLowerCase());
+    child_matches_search = false;
+    for(Enumeration<?> en = children(); en.hasMoreElements();){
+      final var element = en.nextElement();
+      if(element instanceof ProjectExplorerToolNode c) {
+        if(c.testSearchTerm(t)) {
+          child_matches_search = true;
+        }
+      }
+      else if(element instanceof ProjectExplorerLibraryNode c) {
+        if(c.testSearchTerm(t)){
+          child_matches_search = true;
+        }
+      }
+    }
+    return false;
+  }
   private <T> void buildChildren(ProjectExplorerModel.Node<T> factory, List<? extends T> items, int startIndex) {
     // go through previously built children
     Map<T, ProjectExplorerModel.Node<T>> nodeMap = new HashMap<>();
