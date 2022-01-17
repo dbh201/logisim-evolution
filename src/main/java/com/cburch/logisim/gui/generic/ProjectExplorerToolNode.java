@@ -28,7 +28,7 @@ public class ProjectExplorerToolNode extends ProjectExplorerModel.Node<Tool> imp
   private static final long serialVersionUID = 1L;
   private Circuit circuit;
   private VhdlContent vhdl;
-
+  private boolean matches_search = false;
   public ProjectExplorerToolNode(ProjectExplorerModel model, Tool tool) {
     super(model, tool);
     if (tool instanceof AddTool) {
@@ -43,7 +43,13 @@ public class ProjectExplorerToolNode extends ProjectExplorerModel.Node<Tool> imp
       }
     }
   }
-
+  public boolean testSearchTerm(String t) {
+    matches_search = getValue().getDisplayName().toLowerCase().contains(t.toLowerCase());
+    return matches_search;
+  }
+  public boolean matchesSearchTerm() {
+    return matches_search;
+  }
   @Override
   public void contentSet(HdlModel model) {
     // fireStructureChanged();

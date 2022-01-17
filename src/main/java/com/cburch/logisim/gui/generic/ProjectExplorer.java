@@ -58,7 +58,8 @@ import javax.swing.tree.TreeSelectionModel;
 public class ProjectExplorer extends JTree implements LocaleListener {
   public static final Color MAGNIFYING_INTERIOR = new Color(200, 200, 255, 64);
   private static final long serialVersionUID = 1L;
-
+  private final Color COLOR_TERM_FOUND = Color.cyan;
+  private final Color COLOR_TERM_IN_LIBRARY = Color.yellow;
   private final Project proj;
   private final MyListener myListener = new MyListener();
   private final MyCellRenderer renderer = new MyCellRenderer();
@@ -178,26 +179,38 @@ public class ProjectExplorer extends JTree implements LocaleListener {
                     ? (circ != null && circ == proj.getCurrentCircuit())
                     : (vhdl != null && vhdl == proj.getFrame().getHdlEditorView());
           }
+          if(toolNode.matchesSearchTerm()) {
+            label.setOpaque(true);
+            label.setBackground(COLOR_TERM_FOUND);
+          } else {
+            label.setOpaque(false);
+          }
           label.setFont(viewed ? boldFont : plainFont);
           label.setText(tool.getDisplayName());
           label.setIcon(new ToolIcon(tool));
           label.setToolTipText(tool.getDescription());
         }
       } else if (value instanceof ProjectExplorerLibraryNode libNode) {
-        final var lib = libNode.getValue();
-
-        if (ret instanceof JLabel) {
+        if (ret instanceof JLabel label) {
+          final var lib = libNode.getValue();
           final var baseName = lib.getDisplayName();
-          var text = baseName;
-          if (lib.isDirty()) {
-            // TODO: Would be nice to use DIRTY_MARKER here instead of "*" but it does not render
-            // corectly in project tree, font seem to have the character as frame title is fine.
-            // Needs to figure out what is different (java fonts?). Keep "*" unless bug is resolved.
-            final var DIRTY_MARKER_LOCAL = "*"; // useless var for easy DIRTY_MARKER hunt in future.
-            text = DIRTY_MARKER_LOCAL + baseName;
-          }
+
+          // TODO: Would be nice to use DIRTY_MARKER here instead of "*" but it does not render
+          // corectly in project tree, font seem to have the character as frame title is fine.
+          // Needs to figure out what is different (java fonts?). Keep "*" unless bug is resolved.
+          final var DIRTY_MARKER_LOCAL = "*"; // useless var for easy DIRTY_MARKER hunt in future.
+          var text = (lib.isDirty()? DIRTY_MARKER_LOCAL + baseName : baseName);
 
           ((JLabel) ret).setText(text);
+          if(libNode.childMatchesSearchTerm()) {
+            label.setOpaque(true);
+            label.setBackground(COLOR_TERM_IN_LIBRARY);
+          } else if(libNode.matchesSearchTerm()) {
+            label.setOpaque(true);
+            label.setBackground(COLOR_TERM_FOUND);
+          } else {
+            label.setOpaque(false);
+          }
         }
       }
       return ret;

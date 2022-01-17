@@ -69,9 +69,15 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import javax.swing.text.BadLocationException;
 
 public class Frame extends LFrame.MainWindow implements LocaleListener {
   private static final long serialVersionUID = 1L;
@@ -98,6 +104,7 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
   private final JTabbedPane topTab;
   private final JTabbedPane bottomTab;
   private final Toolbox toolbox;
+  private final JTextField searchBar;
   private final SimulationExplorer simExplorer;
   private final AttrTable attrTable;
   private final ZoomControl zoom;
@@ -169,6 +176,47 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
     // explorer and attribute values.
     final var explPanel = new JPanel(new BorderLayout());
     explPanel.add(toolbox, BorderLayout.CENTER);
+
+    // add search bar
+    searchBar = new JTextField( S.get("searchBarDefaultText") );
+    searchBar.setForeground(Color.gray);
+    searchBar.getDocument().addDocumentListener( new DocumentListener() {
+      public void changedUpdate(DocumentEvent e) { 
+      }
+      public void insertUpdate(DocumentEvent e) {
+        final var doc = e.getDocument();
+        try {
+          toolbox.setSearchTerm(doc.getText(0,doc.getLength()));
+        } catch(BadLocationException ble) {
+          System.err.println("Internal error");
+        }
+      }
+      public void removeUpdate(DocumentEvent e) {
+        final var doc = e.getDocument();
+        try {
+          toolbox.setSearchTerm(doc.getText(0,doc.getLength()));
+        } catch(BadLocationException ble) {
+          System.err.println("Internal error");
+        }
+      }
+    });
+    searchBar.addFocusListener( new FocusListener() {
+      public void focusGained(FocusEvent e) {
+        JTextField sb = (JTextField) e.getSource();
+        if(sb.getText().strip().equals(S.get("searchBarDefaultText"))) {
+          sb.setForeground(Color.black);
+          sb.setText("");
+        };
+      }
+      public void focusLost(FocusEvent e) {
+        JTextField sb = (JTextField) e.getSource();
+        if(sb.getText().strip() == "") {
+          sb.setForeground(Color.gray);
+          sb.setText(S.get("searchBarDefaultText"));
+        };        
+      }
+    });
+    explPanel.add(searchBar,BorderLayout.SOUTH);
 
     final var simPanel = new JPanel(new BorderLayout());
     simPanel.add(simExplorer, BorderLayout.CENTER);

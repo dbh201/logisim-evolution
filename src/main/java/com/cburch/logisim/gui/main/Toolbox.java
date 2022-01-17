@@ -11,6 +11,7 @@ package com.cburch.logisim.gui.main;
 
 import com.cburch.draw.toolbar.Toolbar;
 import com.cburch.logisim.gui.generic.ProjectExplorer;
+import com.cburch.logisim.gui.generic.ProjectExplorerLibraryNode;
 import com.cburch.logisim.gui.menu.MenuListener;
 import com.cburch.logisim.proj.Project;
 import com.cburch.logisim.tools.Tool;
@@ -39,7 +40,13 @@ class Toolbox extends JPanel {
   void setHaloedTool(Tool value) {
     toolbox.setHaloedTool(value);
   }
-
+  public void setSearchTerm(String t) {
+    if(t.equals("")) {
+      return;
+    }
+    ((ProjectExplorerLibraryNode)toolbox.getModel().getRoot()).testSearchTerm(t);
+    repaint();
+  }
   public void updateStructure() {
     toolbox.updateStructure();
   }
