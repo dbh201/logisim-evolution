@@ -15,6 +15,10 @@ import javax.swing.JComboBox;
 public class ComboBox<T> extends JComboBox<T> {
   private static final long serialVersionUID = 1L;
 
+  public ComboBox(ComboBoxModel<T> model) {
+    super(model);
+    setKeySelectionManager(new MultiCharSelectionManager());  
+  }
   public ComboBox(T[] choices) {
     super(choices);
     setMaximumRowCount(Math.min(choices.length, 33));
