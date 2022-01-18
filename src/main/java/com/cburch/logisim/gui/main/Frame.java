@@ -59,6 +59,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.awt.Rectangle;
+import static java.awt.SystemColor.menu;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -173,10 +174,16 @@ public class Frame extends LFrame.MainWindow implements LocaleListener {
     final var simPanel = new JPanel(new BorderLayout());
     simPanel.add(simExplorer, BorderLayout.CENTER);
 
+    SimulationToolbarModel toolbarModel = new SimulationToolbarModel(getProject(), menuListener);
+    Toolbar toolbar = new Toolbar(toolbarModel);
+
     topTab = new JTabbedPane();
     topTab.setFont(new Font("Dialog", Font.BOLD, 9));
     topTab.add(explPanel);
     topTab.add(simPanel);
+    topTab.addTab(null, null);
+    topTab.setTabComponentAt(2, toolbar);
+    topTab.setEnabledAt(2, false);
 
     final var attrFooter = new JPanel(new BorderLayout());
     attrFooter.add(zoom);

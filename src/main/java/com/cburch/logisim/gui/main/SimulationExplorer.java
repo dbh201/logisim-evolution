@@ -34,9 +34,11 @@ class SimulationExplorer extends JPanel implements ProjectListener, BaseMouseLis
     super(new BorderLayout());
     this.project = proj;
 
-    SimulationToolbarModel toolbarModel = new SimulationToolbarModel(proj, menu);
-    Toolbar toolbar = new Toolbar(toolbarModel);
-    add(toolbar, BorderLayout.NORTH);
+    //    moved to Frame
+    //
+    //SimulationToolbarModel toolbarModel = new SimulationToolbarModel(proj, menu);
+    //Toolbar toolbar = new Toolbar(toolbarModel);
+    //add(toolbar, BorderLayout.NORTH);
 
     model = new SimulationTreeModel(proj.getRootCircuitStates());
     model.setCurrentView(project.getCircuitState());
