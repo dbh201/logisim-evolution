@@ -11,12 +11,57 @@ package com.cburch.logisim.data;
 
 import com.cburch.logisim.gui.generic.ComboBox;
 import com.cburch.logisim.util.StringGetter;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.Component;
+import javax.swing.DefaultComboBoxModel;
 
 public class BitWidth implements Comparable<BitWidth> {
   static class Attribute extends com.cburch.logisim.data.Attribute<BitWidth> {
     private final BitWidth[] choices;
-
+    private ComboBox combo;
+    private class BitWidthComboBoxModel extends DefaultComboBoxModel<BitWidth> {
+        private int customWidths = 0;
+        public void setSelectedItem(Object obj) {
+          if(obj instanceof BitWidth bw) {
+            int i = getIndexOf(bw);
+            if(i < 0) {
+              if(bw.getWidth() > Math.min(64,Value.MAX_WIDTH)) {
+                // assume highest bit width is at the bottom
+                super.setSelectedItem(getElementAt(getSize() - 1));
+              } else {
+                // non-standard bitwidths go at the top, but only save 3
+                if(customWidths >= 3) {
+                  removeElementAt(2);
+                  customWidths --;
+                }
+                insertElementAt(bw,0);
+                customWidths ++;
+                super.setSelectedItem(bw);
+              }
+            } else {
+              super.setSelectedItem(bw);
+            }
+          } else if (obj instanceof String s) {
+            int i = Integer.valueOf(s);
+            if( i > Value.MAX_WIDTH) {
+              super.setSelectedItem(getElementAt(getSize() - 1));
+            } else if( i < 0) {
+              super.setSelectedItem(getElementAt(0));
+            } else {
+              setSelectedItem(choices[i-1]);
+            }
+          }
+        }
+        public void addElement(BitWidth bw) {
+          if(bw.getWidth() > 64) return;
+          super.addElement(bw);
+        }
+        public void insertElementAt(BitWidth bw,int i) {
+          if(bw.getWidth() > 64) return;
+          super.insertElementAt(bw,i);
+        }
+    }
     public Attribute(String name, StringGetter disp) {
       super(name, disp);
       ensurePrefab();
@@ -34,14 +79,33 @@ public class BitWidth implements Comparable<BitWidth> {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Component getCellEditor(BitWidth value) {
-      final var combo = new ComboBox<>(choices);
+      if(combo != null) {
+        combo.setSelectedItem(value);
+        return combo;
+      }
+      combo = new ComboBox<BitWidth>( new BitWidthComboBoxModel() );
+      //Current value added to top of dropdown menu
       if (value != null) {
         int wid = value.getWidth();
-        if (wid <= 0 || wid > prefab.length) {
+        
+        if (wid != 1 && wid % 8 != 0) {
+          // non-standard width to combobox
           combo.addItem(value);
         }
-        combo.setSelectedItem(value);
       }
+
+      //Dropdown menu items
+      combo.addItem(ONE);
+
+      //Add multiples of 8
+      for(int i = 7; i < Value.MAX_WIDTH; i+=8) {
+        combo.addItem(choices[i]);
+      }
+
+      combo.setMaximumRowCount(combo.getItemCount());
+      combo.setEditable(true);
+      // always select current value
+      combo.setSelectedItem(value);
       return combo;
     }
 
