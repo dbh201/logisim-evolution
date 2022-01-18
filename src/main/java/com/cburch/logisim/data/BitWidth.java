@@ -26,7 +26,7 @@ public class BitWidth implements Comparable<BitWidth> {
           if(obj instanceof BitWidth bw) {
             int i = getIndexOf(bw);
             if(i < 0) {
-              if(bw.getWidth() > Math.min(64,Value.MAX_WIDTH)) {
+              if(bw.getWidth() > Math.min(64,choices[choices.length-1].getWidth())) {
                 // assume highest bit width is at the bottom
                 super.setSelectedItem(getElementAt(getSize() - 1));
               } else {
@@ -43,14 +43,16 @@ public class BitWidth implements Comparable<BitWidth> {
               super.setSelectedItem(bw);
             }
           } else if (obj instanceof String s) {
-            int i = Integer.valueOf(s);
-            if( i > Value.MAX_WIDTH) {
-              super.setSelectedItem(getElementAt(getSize() - 1));
-            } else if( i < 0) {
-              super.setSelectedItem(getElementAt(0));
-            } else {
-              setSelectedItem(choices[i-1]);
-            }
+            try {
+              int i = Integer.valueOf(s);
+              if( i > choices[choices.length-1].getWidth()) {
+                super.setSelectedItem(getElementAt(getSize() - 1));
+              } else if( i <= 0) {
+                super.setSelectedItem(getElementAt(0));
+              } else {
+                setSelectedItem(choices[i-1]);
+              }
+            } catch (NumberFormatException nfe) {}
           }
         }
         public void addElement(BitWidth bw) {
@@ -80,6 +82,7 @@ public class BitWidth implements Comparable<BitWidth> {
     @Override
     public Component getCellEditor(BitWidth value) {
       if(combo != null) {
+        System.out.println("Returned existing combobox.");
         combo.setSelectedItem(value);
         return combo;
       }
@@ -95,11 +98,17 @@ public class BitWidth implements Comparable<BitWidth> {
       }
 
       //Dropdown menu items
-      combo.addItem(ONE);
-
-      //Add multiples of 8
-      for(int i = 7; i < Value.MAX_WIDTH; i+=8) {
-        combo.addItem(choices[i]);
+      if(choices.length < 8) {
+        // small max width
+        for(int i = 0; i < choices.length; i++) {
+          combo.addItem(choices[i]);
+        }
+      } else {
+        // large max width
+        combo.addItem(BitWidth.ONE);
+        for(int i = 7; i < choices.length; i+=8) {
+          combo.addItem(choices[i]);
+        }
       }
 
       combo.setMaximumRowCount(combo.getItemCount());
